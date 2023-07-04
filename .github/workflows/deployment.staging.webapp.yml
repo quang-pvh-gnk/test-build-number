@@ -1,0 +1,40 @@
+name: deployment.staging.webapp
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Deployment flow:
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: staging
+    # This condition make sure the event is release tag
+    # if: github.event_name == 'release' && github.event.action == 'created'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3  
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+       
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          perl -i -pe 's/^(version:\s+\d+\.\d+\.\d+\+)(\d+)$/$1.($2+1)/e' pubspec.yaml
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'Increase build number'
+          branch: develop
+          commit_options: '--no-verify --signoff'
+          file_pattern: pubspec.yaml
+
+   
