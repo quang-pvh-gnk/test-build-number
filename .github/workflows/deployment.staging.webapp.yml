@@ -36,6 +36,6 @@ jobs:
           commit_message: 'Increase build number'
           branch: main
           commit_options: '--no-verify --signoff'
-          file_pattern: '*/**/pubspec.yaml'
+          file_pattern: 'packages/webapp/pubspec.yaml'
 
    
