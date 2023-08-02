@@ -1,39 +1,80 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: public_member_api_docs
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: Center(
-            child: ElevatedButton(
-          child: const Text("Test Call"),
-          onPressed: () async {
-            // _openAPP();
-            launchCaller('0333828707');
-          },
-        )
-            // TextButton(
-            //     onPressed: () {
-            //       _launchURL();
-            //     },
-            //     child: const Text('data')),
-            ),
+      title: 'URL Launcher',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: const MyHomePage(title: 'URL Launcher'),
     );
   }
+}
 
-  void _openAPP() {
-    //  html.window.navigator.getUserMedia(audio: true, video: true);
-    html.window.location.href = "tel:0333828707";
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  bool _hasCallSupport = false;
+  Future<void>? _launched;
+  final String _phone = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Check for phone call support.
+    canLaunchUrl(Uri(scheme: 'tel', path: '0333828707')).then((bool result) {
+      setState(() {
+        _hasCallSupport = result;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Column(
+          children: [
+            TextButton(
+              child: const Text('phone'),
+              onPressed: () {
+                launchCaller('0333828707');
+              },
+            ),
+            TextButton(
+              child: const Text('link'),
+              onPressed: () {
+                launchNewPage(
+                    'https://ssl.fdoc.jp/reserve/subjectlist/index/cid/s0381154?SITE_CODE=hp&_ga=2.66457326.1744645754.1655947314-72516926.1643593405');
+              },
+            ),
+          ],
+        ));
   }
 
   Future<void> launchCaller(String phoneNumber) async {
@@ -41,52 +82,38 @@ class MainApp extends StatelessWidget {
     Uri uri;
     try {
       uri = Uri.parse(url);
-      await launchUrlString(uri.toString(),
-          webViewConfiguration: const WebViewConfiguration(
-              enableJavaScript: false, enableDomStorage: false));
-      // await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       return;
     }
-    // bool canLaunch = await canLaunchUrl(uri);
-    // if (!canLaunch) {
-    //   return;
-    // }
-    // try {
-    //   await launchUrl(uri, mode: LaunchMode.platformDefault);
-    // } catch (e) {
-    //   return;
-    // }
+    bool canLaunch = await canLaunchUrl(uri);
+    if (!canLaunch) {
+      return;
+    }
+    try {
+      await launchUrl(uri);
+    } catch (e) {
+      return;
+    }
   }
 
-  // Future<void> _launchURL() async {
-  //   try {
-  //     await launch(
-  //       'tel:0333828707',
-  //       customTabsOption: CustomTabsOption(
-  //         toolbarColor: Colors.blue,
-  //         enableDefaultShare: true,
-  //         enableUrlBarHiding: true,
-  //         showPageTitle: true,
-  //         animation: CustomTabsSystemAnimation.slideIn(),
-  //         extraCustomTabs: const <String>[
-  //           // ref. https://play.google.com/store/apps/details?id=org.mozilla.firefox
-  //           'org.mozilla.firefox',
-  //           // ref. https://play.google.com/store/apps/details?id=com.microsoft.emmx
-  //           'com.microsoft.emmx',
-  //         ],
-  //       ),
-  //       safariVCOption: const SafariViewControllerOption(
-  //         preferredBarTintColor: Colors.blue,
-  //         preferredControlTintColor: Colors.white,
-  //         barCollapsingEnabled: true,
-  //         entersReaderIfAvailable: true,
-  //         dismissButtonStyle: SafariViewControllerDismissButtonStyle.done,
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     // An exception is thrown if browser app is not installed on Android device.
-  //     debugPrint(e.toString());
-  //   }
-  // }
+  Future<void> launchNewPage(String url) async {
+    Uri uri;
+    try {
+      uri = Uri.parse(url);
+    } catch (e) {
+      return;
+    }
+    bool canLaunch = await canLaunchUrl(uri);
+    if (!canLaunch) {
+      return;
+    }
+    try {
+      await launchUrl(
+        uri,
+        webOnlyWindowName: '_blank',
+      );
+    } catch (e) {
+      return;
+    }
+  }
 }
