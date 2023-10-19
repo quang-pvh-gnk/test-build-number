@@ -8,7 +8,8 @@ import json
 import os
 
 PROJECT_ID = "medica-test-customer"
-CREDENTIALS = json.loads('''{
+CREDENTIALS = json.loads('''
+{
   "type": "service_account",
   "project_id": "medica-test-customer",
   "private_key_id": "5c3456c7940b1beb2d43b5f076a4316cc8fa7a8d",
