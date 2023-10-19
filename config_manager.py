@@ -8,10 +8,13 @@ import json
 import os
 
 PROJECT_ID = os.getenv("PROJECT_ID")
-with open(os.getenv("CREDENTIALS"), 'r') as f:
-    data = f.read()
+FILE_DIR = os.getenv("CREDENTIALS")
 
-CREDENTIALS = json.loads(data)
+contentData = None
+with open(FILE_DIR, 'r') as f:
+    contentData = f.read()
+
+CREDENTIALS = json.loads(contentData)
 
 
 BASE_URL = "https://firebaseremoteconfig.googleapis.com"
