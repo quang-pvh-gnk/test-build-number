@@ -44,10 +44,8 @@ def _get(save=False):
     print(access_token)
     headers = {"Authorization": "Bearer " + access_token}
     resp = requests.get(REMOTE_CONFIG_URL, headers=headers)
-    print(resp.content)
+    print(resp.json())
     print(resp.headers["ETag"])
-    print("koko")
-
     print(resp.status_code)
 
     if save != False and resp.status_code == 200:
@@ -55,7 +53,7 @@ def _get(save=False):
             f.write(resp.text.encode("utf-8"))
 
         print("Retrieved template has been written to config.json")
-    return resp.headers["ETag"]
+    return resp.json(), resp.headers["ETag"]
 
 
 def _listVersions():
@@ -95,45 +93,45 @@ def _publish():
       etag: ETag for safe (avoid race conditions) template updates.
           * can be used to force template replacement.
     """
-    etag = _get()
+    current_data , etag = _get()
+    print("data = ", current_data)
     headers = {
         "Authorization": "Bearer " + _get_access_token(),
         "Content-Type": "application/json; UTF-8",
         "If-Match": etag,
     }
     content = {
-  "conditions": [{
-    "name": "android_english",
-    "expression": "device.country in ['vn', 'jp']"
-  }
-  ],
-  "parameters": {
-    "welcome_message_caps": {
-      "defaultValue": {
-        "value": None
-      },
-      "conditionalValues": {
-        "android_english": {
-          "value": "{\"koko\":\"kttttttttttttt\"}"
+      "conditions": [{
+        "name": "device_lang",
+        "expression": "device.country in ['vn', 'jp']"
+      }],
+      "parameters": {
+        "app_version_android": {
+          "defaultValue": {
+            "value": None
+          },
+          "conditionalValues": {
+            "device_lang": {
+              "value": "{\"android\":\"v1.0.1\"}"
+            }
+          },
+          "description": "App version",
+          "valueType": "JSON"
+        },
+        "app_version_ios": {
+          "defaultValue": {
+            "value": None
+          },
+          "conditionalValues": {
+            "device_lang": {
+              "value": "{\"ios\":\"v1.0.0\"}"
+            }
+          },
+          "description": "App version",
+          "valueType": "JSON"
         }
-      },
-      "description": "Whether the welcome message should be displayed in all capital letters.",
-      "valueType": "JSON"
-    },
-    "bababababababa": {
-      "defaultValue": {
-        "value": None
-      },
-      "conditionalValues": {
-        "android_english": {
-          "value": "{\"koko\":\"lalalalala\"}"
-        }
-      },
-      "description": "Whether the welcome message should be displayed in all capital letters.",
-      "valueType": "JSON"
+      }
     }
-  }
-}
     resp = requests.put(
         REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers
     )
