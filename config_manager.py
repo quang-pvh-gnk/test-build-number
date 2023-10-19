@@ -136,21 +136,14 @@ def _publish():
               },
             }
         }
-        
-    if PLATFORM_APP == "ios":
-        if current_data['app_version_ios'] != None:
-          current_data['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
-        else:
-          current_data['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
-
     else:
-        if current_data['app_version_android'] != None:
-          current_data['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP
-        else:
-          current_data['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP            
-        
+        content = current_data.pop("version")
 
-    content = current_data
+    if PLATFORM_APP == "ios":
+        content['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
+    else:
+        content['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP        
+
     resp = requests.put(
         REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers
     )
