@@ -39,7 +39,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Publish
         env:
-          PROJECT_ID: medica-test-customer
-          CREDENTIALS: keke.json
+          PROJECT_ID: "medica-test-customer"
+          CREDENTIALS: "keke.json"
         run: |
           python config_manager.py --action=publish
