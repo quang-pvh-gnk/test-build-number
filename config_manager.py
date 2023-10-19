@@ -7,12 +7,12 @@ import json
 
 import os
 
-PROJECT_ID = "medica-test-customer"
-
-with open('keke.json', 'r') as f:
+PROJECT_ID = os.getenv("PROJECT_ID")
+with open(os.getenv("CREDENTIALS"), 'r') as f:
     data = f.read()
 
 CREDENTIALS = json.loads(data)
+
 
 BASE_URL = "https://firebaseremoteconfig.googleapis.com"
 REMOTE_CONFIG_ENDPOINT = "v1/projects/" + PROJECT_ID + "/remoteConfig"
