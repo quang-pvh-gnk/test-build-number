@@ -9,6 +9,9 @@ import os
 
 PROJECT_ID = os.getenv("PROJECT_ID")
 FILE_DIR = os.getenv("CREDENTIALS")
+PLATFORM_APP = os.getenv("PLATFORM_APP")
+VERSION_APP = os.getenv("VERSION_APP")
+
 
 contentData = None
 with open(FILE_DIR, 'r') as f:
@@ -100,38 +103,54 @@ def _publish():
         "Content-Type": "application/json; UTF-8",
         "If-Match": etag,
     }
-    content = {
-      "conditions": [{
-        "name": "device_lang",
-        "expression": "device.country in ['vn', 'jp']"
-      }],
-      "parameters": {
-        "app_version_android": {
-          "defaultValue": {
-            "value": None
-          },
-          "conditionalValues": {
-            "device_lang": {
-              "value": "{\"android\":\"v1.0.1\"}"
+
+    content = None
+    if current_data is None or len(current_data) == 0:
+        content = {
+            "conditions": [{
+              "name": "device_lang",
+              "expression": "device.country in ['vn', 'jp']"
+            }],
+            "parameters": {
+              "app_version_android": {
+                "defaultValue": {
+                  "value": None
+                },
+                "conditionalValues": {
+                  "device_lang": {
+                    "value": None
+                  }
+                },
+                "description": "App version android"
+              },
+              "app_version_ios": {
+                "defaultValue": {
+                  "value": None
+                },
+                "conditionalValues": {
+                  "device_lang": {
+                    "value": None
+                  }
+                },
+                "description": "App version ios"
+              },
             }
-          },
-          "description": "App version",
-          "valueType": "JSON"
-        },
-        "app_version_ios": {
-          "defaultValue": {
-            "value": None
-          },
-          "conditionalValues": {
-            "device_lang": {
-              "value": "{\"ios\":\"v1.0.0\"}"
-            }
-          },
-          "description": "App version",
-          "valueType": "JSON"
         }
-      }
-    }
+        
+    if PLATFORM_APP == "ios":
+        if current_data['app_version_ios'] != None:
+          current_data['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
+        else:
+          current_data['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
+
+    else:
+        if current_data['app_version_android'] != None:
+          current_data['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP
+        else:
+          current_data['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP            
+        
+
+    content = current_data
     resp = requests.put(
         REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers
     )

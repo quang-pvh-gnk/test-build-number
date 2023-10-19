@@ -27,5 +27,7 @@ jobs:
         env:
           PROJECT_ID: "medica-test-customer"
           CREDENTIALS: "keke.json"
+          PLATFORM_APP: "ios"
+          VERSION_APP: "v1.1.1.1"
         run: |
-          python config_manager.py --action=publish
+          python config_manager.py --action=get
