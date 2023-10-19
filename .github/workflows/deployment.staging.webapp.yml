@@ -79,4 +79,4 @@ jobs:
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
           CREDENTIALS: ${{ secrets.CREDENTIALS }}
         run: |
-          python remote_config_manager.py --action=publish
+          python config_manager.py --action=publish
