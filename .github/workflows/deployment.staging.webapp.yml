@@ -28,4 +28,4 @@ jobs:
           PROJECT_ID: "medica-test-customer"
           CREDENTIALS: "keke.json"
         run: |
-          python config_manager.py --action=get
+          python config_manager.py --action=publish
