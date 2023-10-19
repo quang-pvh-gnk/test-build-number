@@ -138,7 +138,10 @@ def _publish():
         }
     else:
         print("debugggg")
-        content = current_data.pop("version")
+        content = {}
+        content['conditions'] = current_data['conditions']
+        content['parameters'] = current_data['parameters']
+
         print(content)
     
     if PLATFORM_APP == "ios":
