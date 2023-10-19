@@ -33,6 +33,12 @@ def _get(save=False):
     Retrieve the current Firebase Remote Config template from server and store it
     locally.
     """
+
+
+
+
+
+    
     headers = {"Authorization": "Bearer " + _get_access_token()}
     resp = requests.get(REMOTE_CONFIG_URL, headers=headers)
 
