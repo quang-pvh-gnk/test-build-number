@@ -7,7 +7,7 @@ import json
 
 import os
 
-PROJECT_ID = os.getenv("PROJECT_ID")
+PROJECT_ID = "medica-test-customer"
 CREDENTIALS = json.loads(os.getenv("CREDENTIALS"))
 print("tungutnurnr")
 print(CREDENTIALS)
