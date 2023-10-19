@@ -61,6 +61,6 @@ jobs:
 
       - name: Make HTTP GET request
         run: |
-          API_URL="https://api.example.com/data"
+          API_URL="https://fcm.googleapis.com/fcm/send"
           RESPONSE=$(curl -s "$API_URL")
           echo "API Response: $RESPONSE"
