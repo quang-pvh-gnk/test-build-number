@@ -26,6 +26,6 @@ jobs:
       - name: Publish
         env:
           PROJECT_ID: "medica-test-customer"
-          CREDENTIALS: "koko.py"
+          CREDENTIALS: "keke.json"
         run: |
           python config_manager.py --action=get
