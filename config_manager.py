@@ -92,15 +92,46 @@ def _publish():
           * can be used to force template replacement.
     """
     etag = _get()
-    with open("remoteconfig.template.json", "r", encoding="utf-8") as f:
-        content = f.read()
     headers = {
         "Authorization": "Bearer " + _get_access_token(),
         "Content-Type": "application/json; UTF-8",
         "If-Match": etag,
     }
+    content = {
+  "conditions": [{
+    "name": "android_english",
+    "expression": "device.country in ['vn', 'jp']"
+  }
+  ],
+  "parameters": {
+    "welcome_message_caps": {
+      "defaultValue": {
+        "value": null
+      },
+      "conditionalValues": {
+        "android_english": {
+          "value": "{\"koko\":\"lalalalala\"}"
+        }
+      },
+      "description": "Whether the welcome message should be displayed in all capital letters.",
+      "valueType": "JSON"
+    },
+    "bababababababa": {
+      "defaultValue": {
+        "value": None
+      },
+      "conditionalValues": {
+        "android_english": {
+          "value": "{\"koko\":\"lalalalala\"}"
+        }
+      },
+      "description": "Whether the welcome message should be displayed in all capital letters.",
+      "valueType": "JSON"
+    }
+  }
+}
     resp = requests.put(
-        REMOTE_CONFIG_URL, data=content.encode("utf-8"), headers=headers
+        REMOTE_CONFIG_URL, data=json.dump(content), headers=headers
     )
     if resp.status_code == 200:
         print("Template has been published.")
