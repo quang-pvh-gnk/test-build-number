@@ -35,7 +35,7 @@ def _get_access_token():
 def _get(save=False):
     """Retrieve the current Firebase Remote Config template from server.
     Retrieve the current Firebase Remote Config template from server and store it
-    locally.
+    locally. 
     """
     access_token = _get_access_token()
     print(access_token)
