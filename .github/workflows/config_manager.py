@@ -8,7 +8,7 @@ import json
 import os
 
 PROJECT_ID = os.getenv("PROJECT_ID")
-CREDENTIALS = json.loads(os.getenv("CREDENTIALS"))
+CREDENTIALS = json.loads(".github/workflows/keke.json")
 
 BASE_URL = "https://firebaseremoteconfig.googleapis.com"
 REMOTE_CONFIG_ENDPOINT = "v1/projects/" + PROJECT_ID + "/remoteConfig"
