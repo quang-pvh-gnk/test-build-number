@@ -37,8 +37,12 @@ def _get(save=False):
     Retrieve the current Firebase Remote Config template from server and store it
     locally.
     """
-    headers = {"Authorization": "Bearer " + _get_access_token()}
+    access_token = _get_access_token()
+    print(access_token)
+    headers = {"Authorization": "Bearer " + access_token}
     resp = requests.get(REMOTE_CONFIG_URL, headers=headers)
+
+    print(resp.status_code)
 
     if save != False and resp.status_code == 200:
         with io.open("config.json", "wb") as f:
