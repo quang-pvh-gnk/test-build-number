@@ -137,12 +137,14 @@ def _publish():
             }
         }
     else:
+        print("debugggg")
         content = current_data.pop("version")
-
+        print(content)
+    
     if PLATFORM_APP == "ios":
-        content['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
+        content['parameters']['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
     else:
-        content['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP        
+        content['parameters']['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP        
 
     resp = requests.put(
         REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers
