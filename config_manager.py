@@ -131,7 +131,7 @@ def _publish():
   }
 }
     resp = requests.put(
-        REMOTE_CONFIG_URL, data=json.dump(content), headers=headers
+        REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers
     )
     if resp.status_code == 200:
         print("Template has been published.")
