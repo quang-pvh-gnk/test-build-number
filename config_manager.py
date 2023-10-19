@@ -42,6 +42,7 @@ def _get(save=False):
     headers = {"Authorization": "Bearer " + access_token}
     resp = requests.get(REMOTE_CONFIG_URL, headers=headers)
     print(resp.headers["ETag"])
+    print("koko")
 
     print(resp.status_code)
 
