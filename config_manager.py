@@ -110,7 +110,7 @@ def _publish():
       },
       "conditionalValues": {
         "android_english": {
-          "value": "{\"koko\":\"lalalalala\"}"
+          "value": "{\"koko\":\"kttttttttttttt\"}"
         }
       },
       "description": "Whether the welcome message should be displayed in all capital letters.",
