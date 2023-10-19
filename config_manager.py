@@ -106,7 +106,7 @@ def _publish():
   "parameters": {
     "welcome_message_caps": {
       "defaultValue": {
-        "value": null
+        "value": None
       },
       "conditionalValues": {
         "android_english": {
