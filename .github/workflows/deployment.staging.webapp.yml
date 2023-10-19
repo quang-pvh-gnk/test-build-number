@@ -40,6 +40,6 @@ jobs:
       - name: Publish
         env:
           PROJECT_ID: medica-test-customer
-          CREDENTIALS: keke.json
+          CREDENTIALS: .github/workflows/keke.json
         run: |
           python .github/workflows/config_manager.py --action=publish
