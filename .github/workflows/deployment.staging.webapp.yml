@@ -6,6 +6,12 @@ jobs:
   deploy:
     runs-on: macos-latest
     steps:
+
+      - uses: actions/checkout@v3
+        if: inputs.mobileapp_build_number == ''
+        with:
+          fetch-depth: 0
+
       - name: Cache pip
         uses: actions/cache@v2
         with:
@@ -14,7 +20,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
-      - uses: actions/checkout@v2
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
