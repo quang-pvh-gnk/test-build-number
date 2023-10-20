@@ -36,8 +36,8 @@ jobs:
           FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
         run: |
           cd packages/app_user/scripts/remote_config/
-          FILE_PATH=$RUNNER_TEMP/fb_credential.json
-          echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode --output $FILE_PATH
+          touch fb_credential.json
+          echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode --output fb_credential.json
 
       - name: Publish
         env:
