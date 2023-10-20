@@ -21,15 +21,13 @@ jobs:
           python-version: 3.9
       - name: Install dependencies
         run: |
-          cd packages/app_user/scripts/remote_config/
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r ; fi
+          if [ -f packages/app_user/scripts/remote_config/requirements.txt ]; then pip install -r ; fi
       - name: Publish
         env:
           PROJECT_ID: medica-test-customer
-          CREDENTIALS: fb_credential_prod.json
+          CREDENTIALS: packages/app_user/scripts/remote_config/fb_credential_prod.json
           PLATFORM_APP: ios
           VERSION_APP: 1.1.10.2
         run: |
-          cd packages/app_user/scripts/remote_config/
-          python config_manager.py --action=publish
+          python packages/app_user/scripts/remote_config/config_manager.py --action=publish
