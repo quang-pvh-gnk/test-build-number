@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -26,8 +26,9 @@ jobs:
       - name: Publish
         env:
           PROJECT_ID: medica-test-customer
-          CREDENTIALS: packages/app_user/scripts/remote_config/fb_credential_prod.json
+          CREDENTIALS: fb_credential_prod.json
           PLATFORM_APP: ios
           VERSION_APP: 1.1.10.2
         run: |
-          python packages/app_user/scripts/remote_config/config_manager.py --action=publish
+          cd packages/app_user/scripts/remote_config/
+          python config_manager.py --action=publish
