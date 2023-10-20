@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f packages/app_user/scripts/remote_config/requirements.txt ]; then pip install -r ; fi
+          if [ -f packages/app_user/scripts/remote_config/requirements.txt ]; then pip install -r packages/app_user/scripts/remote_config/requirements.txt ; fi
       - name: Publish
         env:
           PROJECT_ID: medica-test-customer
