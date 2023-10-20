@@ -10,7 +10,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('packages/app_user/scripts/remote_config/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
@@ -18,16 +18,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: 3.9
       - name: Install dependencies
         run: |
+          cd packages/app_user/scripts/remote_config/
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.txt ]; then pip install -r ; fi
       - name: Publish
         env:
           PROJECT_ID: medica-test-customer
-          CREDENTIALS: keke.json
-          PLATFORM_APP: android
-          VERSION_APP: v1.1.23.4
+          CREDENTIALS: fb_credential_prod.json
+          PLATFORM_APP: ios
+          VERSION_APP: 1.1.10.2
         run: |
+          cd packages/app_user/scripts/remote_config/
           python config_manager.py --action=publish
