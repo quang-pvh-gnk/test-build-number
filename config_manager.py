@@ -1,10 +1,8 @@
 import argparse
 import requests
 import io
-
 from oauth2client.service_account import ServiceAccountCredentials
 import json
-
 import os
 
 PROJECT_ID = os.getenv("PROJECT_ID")
@@ -12,11 +10,9 @@ FILE_DIR = os.getenv("CREDENTIALS")
 PLATFORM_APP = os.getenv("PLATFORM_APP")
 VERSION_APP = os.getenv("VERSION_APP")
 
-
 contentData = None
 with open(FILE_DIR, 'r') as f:
     contentData = f.read()
-
 CREDENTIALS = json.loads(contentData)
 
 
@@ -34,11 +30,9 @@ def _get_access_token():
     access_token_info = credentials.get_access_token()
     return access_token_info.access_token
 
-
 # [END retrieve_access_token]
 
-
-def _get(save=False):
+def _get():
     """Retrieve the current Firebase Remote Config template from server.
     Retrieve the current Firebase Remote Config template from server and store it
     locally. 
@@ -51,11 +45,10 @@ def _get(save=False):
     print(resp.headers["ETag"])
     print(resp.status_code)
 
-    if save != False and resp.status_code == 200:
-        with io.open("config.json", "wb") as f:
-            f.write(resp.text.encode("utf-8"))
-
-        print("Retrieved template has been written to config.json")
+    if resp.status_code != 200:
+      print("ERROR")
+      return None, None
+    
     return resp.json(), resp.headers["ETag"]
 
 
@@ -174,12 +167,11 @@ def main():
     else:
         print(
             """Invalid command. Please use one of the following commands:
-python configure.py --action=get
-python configure.py --action=publish
-python configure.py --action=versions
-python configure.py --action=rollback --version=<TEMPLATE_VERSION_NUMBER>"""
+                python config_manager.py --action=get
+                python config_manager.py --action=publish
+                python config_manager.py --action=versions
+                python config_manager.py --action=rollback --version=<TEMPLATE_VERSION_NUMBER>"""
         )
-
 
 if __name__ == "__main__":
     main()
