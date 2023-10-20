@@ -26,7 +26,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
       - name: Publish
         env:
-          PROJECT_ID: medica-test-customer
+          PROJECT_ID: medica-test
           CREDENTIALS: fb_credential_prod.json
           PLATFORM_APP: ios
           VERSION_APP: 1.1.10.2
