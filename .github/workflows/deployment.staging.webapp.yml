@@ -32,7 +32,6 @@ jobs:
           cd packages/app_user/scripts/remote_config/
           FILE_PATH=fb_credential.json
           echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode --output $FILE_PATH
-          if [ -f fb_credential.json ]; then pip install -r requirements.txt ; fi
 
       - name: Publish
         env:
