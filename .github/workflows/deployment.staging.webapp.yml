@@ -4,14 +4,21 @@ on: [push]
 
 jobs:
   deploy:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         if: inputs.mobileapp_build_number == ''
         with:
           fetch-depth: 0
 
-      - name: Install and set Flutter version
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 11
+          cache: "gradle"
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.10.5
@@ -21,19 +28,10 @@ jobs:
           cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
           architecture: x64
 
-
-      - name: Setup Ruby environment
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.0"
           bundler-cache: true
-
-      - uses: actions/cache@v3
-        with:
-          path: Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -44,6 +42,7 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
 
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -64,7 +63,7 @@ jobs:
         env:
           PROJECT_ID: medica-test
           CREDENTIALS: fb_credential.json
-          PLATFORM_APP: ios
+          PLATFORM_APP: android
           VERSION_APP: 1.1.10.2
         run: |
           cd packages/app_user/scripts/remote_config/
