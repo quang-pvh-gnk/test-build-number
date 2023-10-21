@@ -42,7 +42,6 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
 
-      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -52,6 +51,7 @@ jobs:
           cd packages/app_user/scripts/remote_config/
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
+          
       - name: Create service account key
         env:
           FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
