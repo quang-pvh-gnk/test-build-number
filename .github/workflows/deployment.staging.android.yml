@@ -1,70 +1,70 @@
-name: remote-config-deployer
+# name: remote-config-deployer
 
-on: [push]
+# on: [push]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        if: inputs.mobileapp_build_number == ''
-        with:
-          fetch-depth: 0
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#         if: inputs.mobileapp_build_number == ''
+#         with:
+#           fetch-depth: 0
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 11
-          cache: "gradle"
+#       - name: Setup Java
+#         uses: actions/setup-java@v3
+#         with:
+#           distribution: "temurin"
+#           java-version: 11
+#           cache: "gradle"
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.10.5
-          channel: "stable"
-          cache: true
-          cache-key: flutter-3.10.5
-          cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
-          architecture: x64
+#       - name: Setup Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: 3.10.5
+#           channel: "stable"
+#           cache: true
+#           cache-key: flutter-3.10.5
+#           cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
+#           architecture: x64
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.0"
-          bundler-cache: true
+#       - uses: ruby/setup-ruby@v1
+#         with:
+#           ruby-version: "3.0"
+#           bundler-cache: true
 
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('packages/app_user/scripts/remote_config/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+#       - name: Cache pip
+#         uses: actions/cache@v2
+#         with:
+#           path: ~/.cache/pip
+#           key: ${{ runner.os }}-pip-${{ hashFiles('packages/app_user/scripts/remote_config/requirements.txt') }}
+#           restore-keys: |
+#             ${{ runner.os }}-pip-
+#             ${{ runner.os }}-
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: |
-          cd packages/app_user/scripts/remote_config/
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
+#       - name: Set up Python
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: 3.9
+#       - name: Install dependencies
+#         run: |
+#           cd packages/app_user/scripts/remote_config/
+#           python -m pip install --upgrade pip
+#           if [ -f requirements.txt ]; then pip install -r requirements.txt ; fi
 
-      - name: Create service account key
-        env:
-          FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
-        run: |
-          cd packages/app_user/scripts/remote_config/
-          FILE_PATH=fb_credential.json
-          echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode > $FILE_PATH
-      - name: Publish
-        env:
-          PROJECT_ID: medica-test
-          CREDENTIALS: fb_credential.json
-          PLATFORM_APP: android
-          VERSION_APP: 1.1.10.990+88
-        run: |
-          cd packages/app_user/scripts/remote_config/
-          python config_manager.py --action=publish
+#       - name: Create service account key
+#         env:
+#           FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
+#         run: |
+#           cd packages/app_user/scripts/remote_config/
+#           FILE_PATH=fb_credential.json
+#           echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode > $FILE_PATH
+#       - name: Publish
+#         env:
+#           PROJECT_ID: medica-test
+#           CREDENTIALS: fb_credential.json
+#           PLATFORM_APP: android
+#           VERSION_APP: 1.1.10+121
+#         run: |
+#           cd packages/app_user/scripts/remote_config/
+#           python config_manager.py --action=publish
