@@ -126,7 +126,7 @@ def _publish():
                 "defaultValue": {
                   "value": None
                   }
-                }
+                } 
         content['parameters']['app_version_ios']['defaultValue']['value'] = VERSION_APP
     else:
         if paramObj.get('app_version_android') is None or len(paramObj.get('app_version_android')) == 0:
