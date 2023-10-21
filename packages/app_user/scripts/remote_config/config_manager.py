@@ -100,30 +100,16 @@ def _publish():
     content = None
     if current_data is None or len(current_data) == 0:
         content = {
-            "conditions": [{
-              "name": "device_lang",
-              "expression": "device.country in ['vn', 'jp']"
-            }],
             "parameters": {
               "app_version_android": {
                 "defaultValue": {
                   "value": None
-                },
-                "conditionalValues": {
-                  "device_lang": {
-                    "value": None
-                  }
                 },
                 "description": "App version android"
               },
               "app_version_ios": {
                 "defaultValue": {
                   "value": None
-                },
-                "conditionalValues": {
-                  "device_lang": {
-                    "value": None
-                  }
                 },
                 "description": "App version ios"
               },
@@ -132,11 +118,23 @@ def _publish():
     else:
         content = current_data
         content.pop("version")
-    
+        
     if PLATFORM_APP == "ios":
-        content['parameters']['app_version_ios']['conditionalValues']['device_lang']['value'] = VERSION_APP
+        if content['parameters']['app_version_ios'] is None or len(content['parameters']['app_version_ios']) == 0:
+            content['parameters']['app_version_ios'] = {
+                "defaultValue": {
+                  "value": None
+                  }
+                }
+        content['parameters']['app_version_ios']['defaultValue']['value'] = VERSION_APP
     else:
-        content['parameters']['app_version_android']['conditionalValues']['device_lang']['value'] = VERSION_APP        
+        if content['parameters']['app_version_android'] is None or len(content['parameters']['app_version_android']) == 0:
+            content['parameters']['app_version_android'] = {
+                "defaultValue": {
+                  "value": None
+                }
+              }
+        content['parameters']['app_version_android']['defaultValue']['value'] = VERSION_APP    
 
     resp = requests.put(
         REMOTE_CONFIG_URL, data=json.dumps(content), headers=headers

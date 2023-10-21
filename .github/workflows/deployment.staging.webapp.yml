@@ -64,7 +64,7 @@ jobs:
           PROJECT_ID: medica-test
           CREDENTIALS: fb_credential.json
           PLATFORM_APP: android
-          VERSION_APP: 1.1.10.2
+          VERSION_APP: 1.1.10.990+8
         run: |
           cd packages/app_user/scripts/remote_config/
           python config_manager.py --action=publish

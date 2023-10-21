@@ -1,31 +1,10 @@
 name: deployment.dev.mobile.ios
 
-on:
-  workflow_dispatch:
-
-  push:
-    branches: ["develop"]
-    paths:
-      - "packages/app_user/**"
-      - "!**.md"
-
-  workflow_call:
-    inputs:
-      mobileapp_build_number:
-        required: false
-        type: string
+on: [push]
 
 jobs:
-  config:
-    uses: ./.github/workflows/config.yml
-    with:
-      github-ref: ${{ github.ref }}
-      environment: development
-
   deploy_ios:
     runs-on: macos-latest
-    needs: config
-    environment: ${{ needs.config.outputs.ENV }}
     env:
       SCHEME: Runner
       BUILD_CONFIGURATION: Release
@@ -33,170 +12,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        if: inputs.mobileapp_build_number != ''
-
-      - uses: actions/checkout@v3
         if: inputs.mobileapp_build_number == ''
         with:
           fetch-depth: 0
 
-      # build number is defined by latest tag number on github.
-      # In IOS,     it would be CFBundleVersion in Info.plist
-      # In Android, it would be build_number in pubspec.yaml
-      - name: Set mobileapp build number
-        if: inputs.mobileapp_build_number == ''
-        run: |
-          LATEST_MOBILEAPP_BUILD_NUMBER_TAG=$(git ls-remote --tags origin "mobileapp-ios-b*" | awk '{print $2}' | sort -V | tail -n 1)
-          MOBILEAPP_BUILD_NUMBER=$(($(echo "$LATEST_MOBILEAPP_BUILD_NUMBER_TAG" | sed "s/^refs\/tags\/mobileapp-ios-b//") + 1))
-          echo "MOBILEAPP_BUILD_NUMBER=$MOBILEAPP_BUILD_NUMBER" >> $GITHUB_ENV
-
-      - name: Push mobileapp build number tag
-        if: inputs.mobileapp_build_number == ''
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/mobileapp-ios-b${{ env.MOBILEAPP_BUILD_NUMBER }}',
-              sha: context.sha
-            })
-
-      - name: Set mobileapp tag prefix
-        run: |
-          MOBILEAPP_TAG_PREFIX=mobileapp-development-ios-v
-
-          echo "MOBILEAPP_TAG_PREFIX=$MOBILEAPP_TAG_PREFIX" >> $GITHUB_ENV
-
-          # MOBILEAPP_VERSION_NAME=$(grep '^version: ' packages/app_user/pubspec.yaml | cut -d' ' -f2)
-          MOBILEAPP_VERSION_NAME=${{ env.IOS_CURRENT_VERSION }}
-          MOBILEAPP_VERSION=$(echo "$MOBILEAPP_VERSION_NAME+$MOBILEAPP_BUILD_NUMBER")
-          echo "MOBILEAPP_VERSION=$MOBILEAPP_VERSION" >> $GITHUB_ENV
-        env:
-          MOBILEAPP_BUILD_NUMBER: ${{ inputs.mobileapp_build_number || env.MOBILEAPP_BUILD_NUMBER }}
-
-      - name: Push mobileapp version tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ env.MOBILEAPP_TAG_PREFIX }}${{ env.MOBILEAPP_VERSION }}',
-              sha: context.sha
-            })
-
-      - name: Install Apple Certificate
-        uses: apple-actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.P12_BASE64 }}
-          p12-password: ${{ secrets.P12_PASSWORD }}
-
-      - name: Config environments
-        id: config
-        working-directory: packages/app_user/environments
-        run: |
-          ./load.sh "${{ needs.config.outputs.ENV }}" $GITHUB_OUTPUT
-
-      - name: Install the provisioning profile
-        env:
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
-        run: |
-          # create variables
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-
-          # import provisioning profile from secrets
-          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode --output $PP_PATH
-
-          # apply provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-
       - name: Install and set Flutter version
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ steps.config.outputs.FLUTTER_VERSION }}
+          flutter-version: 3.10.5
           channel: "stable"
           cache: true
-          cache-key: flutter-${{ steps.config.outputs.FLUTTER_VERSION }}
-          cache-path: ${{ runner.tool_cache }}/flutter-${{ steps.config.outputs.FLUTTER_VERSION }}
+          cache-key: flutter-3.10.5
+          cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
           architecture: x64
-
-      - name: Config app environments
-        run: |
-          sed -i '' "s/^version: .*/version: ${{ env.MOBILEAPP_VERSION }}/" packages/app_user/pubspec.yaml
-
-      - name: Restore packages
-        run: |
-          cd packages/app_user/
-          /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ env.MOBILEAPP_BUILD_NUMBER }}" "ios/Runner/Info.plist"
-          flutter clean
-          flutter pub get
-          ./scripts/replacement/ios.sh ${{ runner.tool_cache }}/flutter-${{ steps.config.outputs.FLUTTER_VERSION }}
-
-      - name: Build Flutter app
-        run: |
-          cd packages/app_user/
-          echo '<debug>'
-          cat pubspec.yaml
-          echo '</debug>'
-          flutter build ios -t lib/main_stag.dart --release --no-codesign --flavor staging
-
-      - name: Build resolve Swift dependencies
-        run: xcodebuild -resolvePackageDependencies -workspace packages/app_user/ios/Runner.xcworkspace -scheme Runner -configuration Release
-
-      - name: Build xArchive
-        run: |
-          xcodebuild  -workspace packages/app_user/ios/Runner.xcworkspace \
-                      -scheme Runner \
-                      -configuration Release \
-                      -sdk iphoneos \
-                      -archivePath packages/app_user/ios/Runner.xcarchive \
-                      DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }} \
-                      PROVISIONING_PROFILE_SPECIFIER=${{ secrets.PROVISIONING_PROFILE_SPECIFIER }} \
-                      AD_HOC_CODE_SIGNING_ALLOWED=NO \
-                      CODE_SIGN_STYLE=Manual \
-                      clean archive
-
-      - name: Generate ExportOptions.plist
-        run: |
-          if [ -f packages/app_user/ios/ExportOptions.plist ]; then
-            rm packages/app_user/ios/ExportOptions.plist
-            echo "File ExportOptions.plist removed successfully"
-          fi
-
-          cat <<EOF > packages/app_user/ios/ExportOptions.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store</string>
-            <key>teamID</key>
-            <string>${{ secrets.DEVELOPMENT_TEAM }}</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>${{ steps.config.outputs.IOS_BUNDLE_ID }}</key>
-              <string>${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}</string>
-            </dict>
-          </dict>
-          </plist>
-          EOF
-
-          echo '<debug>'
-          cat packages/app_user/ios/ExportOptions.plist
-          echo '</debug>'
-
-      - name: Export Archive
-        run: |
-          xcodebuild -exportArchive \
-                    -archivePath packages/app_user/ios/Runner.xcarchive \
-                    -exportPath packages/app_user/ios/Runner.ipa \
-                    -exportOptionsPlist packages/app_user/ios/ExportOptions.plist \
-                    AD_HOC_CODE_SIGNING_ALLOWED=NO
-
+ 
       - name: Setup Ruby environment
         uses: ruby/setup-ruby@v1
         with:
@@ -210,30 +39,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
 
-      - name: Install Bundle && Fastlane
-        working-directory: packages/app_user/ios
-        run: |
-          gem install bundler:1.17.2
-          bundle install
-
-      - name: Upload to TestFlight
-        working-directory: packages/app_user/ios
-        run: |
-          export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
-
-          bundle exec fastlane pilot upload \
-                    --ipa Runner.ipa/app_user.ipa \
-                    --apple_id ${{ secrets.APPLE_ID }} \
-                    --skip_submission true \
-                    --skip_waiting_for_build_processing true \
-                    --distribute_external false \
-                    --notify_external_testers false
-        env:
-          APP_IDENTIFIER: ${{ steps.config.outputs.IOS_BUNDLE_ID }}
-          APPLE_ID: ${{ secrets.APPLE_ACCOUNT_ID }}
-          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
-          TEAM_ID: ${{ secrets.DEVELOPMENT_TEAM }}
-
       - name: Cache pip
         uses: actions/cache@v2
         with:
@@ -243,11 +48,11 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
             
-      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ steps.config.outputs.PYTHON_VERSION }}
+          python-version: 3.9
+          
       - name: Install dependencies
         run: |
           cd packages/app_user/scripts/remote_config/
@@ -256,7 +61,7 @@ jobs:
 
       - name: Create service account key
         env:
-          FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_SERVICE_ACCOUNT_BASE64_STAG }}
+          FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
         run: |
           cd packages/app_user/scripts/remote_config/
           FILE_PATH=fb_credential.json
@@ -267,7 +72,7 @@ jobs:
           PROJECT_ID: ${{ steps.config.outputs.FB_PROJECT_ID_STAGING }}
           CREDENTIALS: fb_credential.json
           PLATFORM_APP: ios
-          VERSION_APP: ${{ env.MOBILEAPP_VERSION }}
+          VERSION_APP: 1.0.0+222
         run: |
           cd packages/app_user/scripts/remote_config/
           python config_manager.py --action=publish
