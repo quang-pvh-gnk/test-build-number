@@ -118,9 +118,10 @@ def _publish():
     else:
         content = current_data
         content.pop("version")
-        
+    
+    paramObj = content.get('parameters')
     if PLATFORM_APP == "ios":
-        if content['parameters']['app_version_ios'] is None or len(content['parameters']['app_version_ios']) == 0:
+        if paramObj.get('app_version_ios') is None or len(paramObj.get('app_version_ios')) == 0:
             content['parameters']['app_version_ios'] = {
                 "defaultValue": {
                   "value": None
@@ -128,7 +129,7 @@ def _publish():
                 }
         content['parameters']['app_version_ios']['defaultValue']['value'] = VERSION_APP
     else:
-        if content['parameters']['app_version_android'] is None or len(content['parameters']['app_version_android']) == 0:
+        if paramObj.get('app_version_android') is None or len(paramObj.get('app_version_android')) == 0:
             content['parameters']['app_version_android'] = {
                 "defaultValue": {
                   "value": None
