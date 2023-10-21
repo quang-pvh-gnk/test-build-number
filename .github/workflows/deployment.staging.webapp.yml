@@ -21,9 +21,6 @@ jobs:
           cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
           architecture: x64
 
-      - name: Config app environments
-        run: |
-          sed -i '' "s/^version: .*/version: ${{ env.MOBILEAPP_VERSION }}/" packages/app_user/pubspec.yaml
 
       - name: Setup Ruby environment
         uses: ruby/setup-ruby@v1
