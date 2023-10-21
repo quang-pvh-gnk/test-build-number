@@ -57,8 +57,8 @@ jobs:
           FB_SERVICE_ACCOUNT_BASE64: ${{ secrets.FB_KEY }}
         run: |
           cd packages/app_user/scripts/remote_config/
-          touch fb_credential.json
-          echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode > fb_credential.json
+          FILE_PATH=fb_credential.json
+          echo -n "$FB_SERVICE_ACCOUNT_BASE64" | base64 --decode > $FILE_PATH
       - name: Publish
         env:
           PROJECT_ID: medica-test
