@@ -11,6 +11,67 @@ jobs:
         with:
           fetch-depth: 0
 
+
+      # build number is defined by latest tag number on github.
+      # In IOS,     it would be CFBundleVersion in Info.plist
+      # In Android, it would be build_number in pubspec.yaml
+      - name: Set mobileapp build number
+        if: inputs.mobileapp_build_number == ''
+        run: |
+          LATEST_MOBILEAPP_BUILD_NUMBER_TAG=$(git ls-remote --tags origin "mobileapp-ios-b*" | awk '{print $2}' | sort -V | tail -n 1)
+          MOBILEAPP_BUILD_NUMBER=$(($(echo "$LATEST_MOBILEAPP_BUILD_NUMBER_TAG" | sed "s/^refs\/tags\/mobileapp-ios-b//") + 1))
+          echo "MOBILEAPP_BUILD_NUMBER=$MOBILEAPP_BUILD_NUMBER" >> $GITHUB_ENV
+
+      - name: Push mobileapp build number tag
+        if: inputs.mobileapp_build_number == ''
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/mobileapp-ios-b${{ env.MOBILEAPP_BUILD_NUMBER }}',
+              sha: context.sha
+            })
+
+      - name: Push mobileapp version tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.MOBILEAPP_TAG_PREFIX }}',
+              sha: context.sha
+            })
+
+      - name: Install and set Flutter version
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.10.5
+          channel: "stable"
+          cache: true
+          cache-key: flutter-3.10.5
+          cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
+          architecture: x64
+
+      - name: Config app environments
+        run: |
+          sed -i '' "s/^version: .*/version: ${{ env.MOBILEAPP_VERSION }}/" packages/app_user/pubspec.yaml
+
+      - name: Setup Ruby environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+          bundler-cache: true
+
+      - uses: actions/cache@v3
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Cache pip
         uses: actions/cache@v2
         with:
@@ -19,6 +80,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
