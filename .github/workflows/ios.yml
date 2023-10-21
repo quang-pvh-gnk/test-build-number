@@ -52,7 +52,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-          
+
       - name: Install dependencies
         run: |
           cd packages/app_user/scripts/remote_config/
@@ -69,7 +69,7 @@ jobs:
           
       - name: Publish
         env:
-          PROJECT_ID: ${{ steps.config.outputs.FB_PROJECT_ID_STAGING }}
+          PROJECT_ID: medica-test
           CREDENTIALS: fb_credential.json
           PLATFORM_APP: ios
           VERSION_APP: 1.0.0+222
