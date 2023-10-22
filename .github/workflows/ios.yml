@@ -35,7 +35,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/app_user/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          key: ${{ runner.os }}-pods-${{ hashFiles('packages/app_user/ios/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
 
