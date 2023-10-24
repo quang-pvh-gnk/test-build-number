@@ -27,6 +27,8 @@ SCOPES = ["https://www.googleapis.com/auth/firebase.remoteconfig"]
 
 dt = datetime.now() + timedelta(minutes=19)
 
+instance = jwt.JWT()
+
 headers = {
     "alg": "ES256",
     "kid": "2FJAKP64WV", 
@@ -43,7 +45,7 @@ payload = {
 with open("AuthKey_2FJAKP64WV.p8", "rb") as fh: # Add your file
     signing_key = fh.read()
 
-gen_jwt = jwt.encode(payload, signing_key, algorithm="ES256", headers=headers)
+gen_jwt = instance.encode(payload, signing_key, algorithm="ES256", headers=headers)
 
 print(f"[JWT] {gen_jwt}")
 
