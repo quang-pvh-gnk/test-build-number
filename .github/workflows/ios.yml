@@ -16,30 +16,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install and set Flutter version
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.10.5
-          channel: "stable"
-          cache: true
-          cache-key: flutter-3.10.5
-          cache-path: ${{ runner.tool_cache }}/flutter-3.10.5
-          architecture: x64
-
-      - name: Setup Ruby environment
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.0"
-          bundler-cache: true
-
-      - name: Cache cocoapods
-        uses: actions/cache@v2
-        with:
-          path: packages/app_user/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('packages/app_user/ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
       - name: Cache pip
         uses: actions/cache@v2
         with:
