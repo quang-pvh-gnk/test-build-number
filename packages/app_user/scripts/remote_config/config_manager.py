@@ -4,6 +4,9 @@ import io
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
+from datetime import datetime, timedelta
+from time import time, mktime
+import jwt
 
 PROJECT_ID = os.getenv("PROJECT_ID")
 FILE_DIR = os.getenv("CREDENTIALS")
@@ -20,6 +23,30 @@ BASE_URL = "https://firebaseremoteconfig.googleapis.com"
 REMOTE_CONFIG_ENDPOINT = "v1/projects/" + PROJECT_ID + "/remoteConfig"
 REMOTE_CONFIG_URL = BASE_URL + "/" + REMOTE_CONFIG_ENDPOINT
 SCOPES = ["https://www.googleapis.com/auth/firebase.remoteconfig"]
+
+
+dt = datetime.now() + timedelta(minutes=19)
+
+headers = {
+    "alg": "ES256",
+    "kid": "2FJAKP64WV", 
+    "typ": "JWT",
+}
+
+payload = {
+    "iss": "a6d36ee7-9845-4ea9-85ac-e56bb4742604",
+    "iat": int(time()),
+    "exp": int(mktime(dt.timetuple())),
+    "aud": "appstoreconnect-v1",
+}
+
+with open("AuthKey_2FJAKP64WV.p8", "rb") as fh: # Add your file
+    signing_key = fh.read()
+
+gen_jwt = jwt.encode(payload, signing_key, algorithm="ES256", headers=headers)
+
+print(f"[JWT] {gen_jwt}")
+
 
 # [START retrieve_access_token]
 def _get_access_token():
