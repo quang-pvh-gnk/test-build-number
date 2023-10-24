@@ -1,4 +1,4 @@
 oauth2client
 requests
 python-dotenv
-pyjwt
+pyjwt[crypto]
