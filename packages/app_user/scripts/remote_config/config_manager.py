@@ -45,7 +45,7 @@ with open("AuthKey_2FJAKP64WV.p8", "rb") as fh: # Add your file
 
 gen_jwt = jwt.encode(payload, signing_key, algorithm="ES256", headers=headers)
 
-print(f"[JWT] {gen_jwt}")
+print(gen_jwt)
 
 
 # [START retrieve_access_token]
@@ -198,6 +198,3 @@ def main():
                 python config_manager.py --action=versions
                 python config_manager.py --action=rollback --version=<TEMPLATE_VERSION_NUMBER>"""
         )
-
-if __name__ == "__main__":
-    main()
