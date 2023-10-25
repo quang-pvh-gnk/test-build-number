@@ -40,7 +40,7 @@ payload = {
     "aud": "appstoreconnect-v1",
 }
 
-with open("packages/app_user/scripts/remote_config/AuthKey_2FJAKP64WV.p8", "rb") as fh: # Add your file
+with open("AuthKey_2FJAKP64WV.p8", "rb") as fh: # Add your file
     signing_key = fh.read()
 
 gen_jwt = jwt.encode(payload, signing_key, algorithm="ES256", headers=headers)
